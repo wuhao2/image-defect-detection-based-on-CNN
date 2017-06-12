@@ -19,7 +19,7 @@ def xavier_init(fan_in, fan_out, constant=1):
     high = constant*np.sqrt(6.0 / (fan_in + fan_out))
     return tf.random_uniform((fan_in, fan_out), minval=low, maxval=high, dtype=tf.float32)
 
-#加速高斯噪声的自动编码器
+#加性高斯噪声的自动编码器
 class AdditiveGaussianNoiseAutoEncoder(object):
 
     def __init__(self, n_input, n_hidden, transfer_function=tf.nn.softplus,
@@ -39,7 +39,7 @@ class AdditiveGaussianNoiseAutoEncoder(object):
         #添加噪声层
         with tf.name_scope('NoiseAdder'):
             self.scale = tf.placeholder(tf.float32)
-            self.noise_x = self.x + scale*tf.random_normal((n_input,))#添加噪声
+            self.noise_x = self.x + scale*tf.random_normal((n_input,))#添加加性高斯噪声
 
         # 编码器层
         with tf.name_scope('Encoder'):
@@ -55,12 +55,12 @@ class AdditiveGaussianNoiseAutoEncoder(object):
             self.reconstruction = tf.add(tf.matmul(self.hidden, self.weights['w2']),
                                      self.weights['b2'])
         with tf.name_scope('Loss'):
-            self.cost = 0.5*tf.reduce_sum(tf.pow(tf.subtract(self.reconstruction, self.x), 2))
+            self.cost = 0.5*tf.reduce_sum(tf.pow(tf.subtract(self.reconstruction, self.x), 2))#此处采用的是平方误差和，容易产生过拟合
         # 训练层
         with tf.name_scope('Train'):
             self.optimizer = optimizer.minimize(self.cost)
 
-
+        #开启会话
         init = tf.global_variables_initializer()
         self.sess = tf.Session()
         self.sess.run(init)
@@ -77,7 +77,6 @@ class AdditiveGaussianNoiseAutoEncoder(object):
     #     return all_weights
 
     #一个批次傻瓜训练模型
-
     def partial_fit(self,X):
         cost, opt = self.sess.run((self.cost, self.optimizer),
                                   feed_dict={self.x:X, self.scale:self.training_sacle})
@@ -116,54 +115,59 @@ class AdditiveGaussianNoiseAutoEncoder(object):
 #实例化类对象
 AGN_AutoEncoder = AdditiveGaussianNoiseAutoEncoder(n_input=784, n_hidden=200, transfer_function=tf.nn.softplus,
                                           optimizer=tf.train.AdamOptimizer(learning_rate=0.01),
-                                          scale=0.1)
-
-
+                                          scale=0.1) #scale是加性高斯噪声水平
 print("write calculation graph into eventfile, show on tensorboard")
 writer = tf.summary.FileWriter(logdir='logs', graph=AGN_AutoEncoder.sess.graph)
 writer.close()
-
-#加载数据集
-mnist = input_data.read_data_sets('../Basic_Model/mnist_data/', one_hot=True)
-
+##############################################################################################################
 
 #使用sklearn.preprocess的数据标准化操作，（0均值，标准差为1)预处理数据
 def standard_scale(X_train, X_test):
     preprocessor = prep.StandardScaler().fit(X_train)#fit()在训练集上估计均值与方差
     X_train = preprocessor.transform(X_train)
     X_test = preprocessor.transform(X_test)#直接用训练集估计出来的均值与方差
-    return X_train, X_test
+    return X_train, X_test #返回0均值标准差为1的训练集合测试集
 
 
 #获取随机block数据的函数：娶一个从0-len(data)的batch_size的随机整数
 #以这个随机整数为随机索引，抽出一个batch_size批次的样本
 def get_random_block_from_data(data, batch_size):
     start_index = np.random.randint(0, len(data)- batch_size)#返回一个随机的小于len(data)- batch_size的数（索引）
-    return data[start_index:(start_index + batch_size)]
+    return data[start_index:(start_index + batch_size)]#说明是又放回的抽样
 
+"""
+#加载数据集,tensorflow 提供的读取数据的函数read_data_sets()
+"""
+mnist = input_data.read_data_sets('../Basic_Model/mnist_data/', one_hot=True)
+
+"""
 #使用标准化操作变换数据集
+"""
 X_train, X_test = standard_scale(mnist.train.images, mnist.test.images)
-
+"""
 #定义训练参数
+"""
 n_samples = int(mnist.train.num_examples)#训练样本的总数
 training_epochs = 20#最大训练回合数，n_samples/batch_size为1个回合
 batch_size = 128#每一批次的样本数量
 display_step = 1#输出训练结果的间隔
-
+"""
 #开始训练过程：每一回合epoch训练开始，将平均损失设为0
+"""
 for epoch in range(training_epochs):
     avg_cost = 0
-    total_batch = int(n_samples/batch_size)#使用又放回抽样，不能保证每个样本都被抽到并参与训练
+    total_batch = int(n_samples/batch_size)#使用有放回抽样，不能保证每个样本都被抽到并参与训练
     #在每个batch的循环中，随机抽取一个batch的数据，使用成员函数partial_fit，训练个batch
     #的数据，计算cost，累积到当前回合的平均cost中
     for i in range(total_batch):
-        batch_xs = get_random_block_from_data(X_train, batch_size)
+        batch_xs = get_random_block_from_data(X_train, batch_size)#返回128个样本
         cost = AGN_AutoEncoder.partial_fit(batch_xs)
         avg_cost += cost/batch_size
     avg_cost /= total_batch#得到平均损失
 
     if epoch % display_step == 0:
         print("epoch : %04d, cost = %.9f" %(epoch+1, avg_cost))
-
+"""
 #计算测试集上的cost
+"""
 print('total cost:', str(AGN_AutoEncoder.calc_total_cost(X_test)))
