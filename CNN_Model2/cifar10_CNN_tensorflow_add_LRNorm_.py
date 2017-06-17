@@ -26,15 +26,16 @@ training_epochs = 6
 """
 # learning_rate_init = 0.1
 # learning_rate_init = 0.01
-learning_rate_init = 0.001
 # learning_rate_init = 0.001
-# learning_rate_init = 0.0001
+learning_rate_init = 0.0001
 batch_size = 100
-display_step = 20
+display_step = 50
 conv1_kernels_num = 32 #64个卷积核，这是超参数，应该写到开头
 conv2_kernels_num = 32 #64个卷积核
 fc1_units_num = 250
 fc2_units_num = 150
+
+keep_prob_init = 0.8 #实验表明：keep_prob_init越大，丢弃得越少，正则化强度越低
 ################################################################################################
 #从网上下载并解压缩数据集from Alex's website，存放到data_dir指定的目录下
 # def maybe_download_and_extract(data_dir):
@@ -172,19 +173,38 @@ def Inference(images_holder):
         with tf.name_scope('Pool2d_1'):
             pool1_out = Pool2d(conv1_out, pool=tf.nn.max_pool, k=3, stride=2, padding='SAME')
 
+        ####################################添加局部相应归一化层
+        with tf.name_scope('LRNorm_1'):
+            norm1_out = tf.nn.lrn(pool1_out,
+                                  depth_radius=4,
+                                  bias=1.0,
+                                  alpha='0.001/9.0',
+                                  beta=0.75,
+                                  name='norm1')
+
         #第二个卷积层activate（conv2d + biase）
         with tf.name_scope('Conv2d_2'):
             # conv2_kernels_num = 32 #64个卷积核
             weights = WeightVariable(shape=[5,5,conv1_kernels_num, conv2_kernels_num],
                                      name_str='weights', stddev=5e-2)#0.005
             biases = BiasesVariable(shape=[conv2_kernels_num], name_str='biases', init_value=0.0)
-            conv2_out = Conv2d(pool1_out, weights, biases, stride=1, padding='SAME',
+            conv2_out = Conv2d(norm1_out, weights, biases, stride=1, padding='SAME',
                                 activation=activation_func, act_name=activation_name)#没有传激活函数，默认为relu
             #汇总
             AddActivationSummary(conv2_out)
+
+        ####################################添加局部相应归一化层
+        with tf.name_scope('LRNorm_2'):
+            norm2_out = tf.nn.lrn(conv2_out,
+                                  depth_radius=4,
+                                  bias=1.0,
+                                  alpha='0.001/9.0',
+                                  beta=0.75,
+                                  name='norm2')
+
         #第二个池化层pool2d
         with tf.name_scope('Pool2d_2'):
-            pool2_out = Pool2d(conv2_out, pool=tf.nn.max_pool, k=3, stride=2, padding='SAME')
+            pool2_out = Pool2d(norm2_out, pool=tf.nn.max_pool, k=3, stride=2, padding='SAME')
 
         #将2维特征图转化为一维的特征向量
         with tf.name_scope('FeatsReshape'):
@@ -223,13 +243,15 @@ def Inference(images_holder):
             with tf.name_scope('L2_Loss'):
                 weights_loss = tf.multiply(tf.nn.l2_loss(weights), l2loss_ratio, name='weight_loss')
                 tf.add_to_collection('losses', weights_loss)
+
+
         #第三个全连接层
         with tf.name_scope('FC3_linear'):
             fc3_units_num = n_classes #10
             weights = WeightVariable(shape=[fc2_units_num, fc3_units_num],
                                      name_str='weights', stddev=1.0/fc2_units_num)
             biases = BiasesVariable(shape=[fc3_units_num], name_str='biases', init_value=0.0)
-            logits = FullyConnection(fc2_out, weights, biases,
+            logits = FullyConnection(fc_dropout, weights, biases,
                                       activate=tf.identity,
                                       act_name='identity'
                                       )
