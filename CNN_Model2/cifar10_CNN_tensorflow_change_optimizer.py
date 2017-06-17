@@ -30,8 +30,9 @@ training_epochs = 6
 """
 改变学习率
 """
-learning_rate_init = 0.01
-# learning_rate_init = 0.001
+# learning_rate_init = 0.1
+# learning_rate_init = 0.01
+learning_rate_init = 0.001
 # learning_rate_init = 0.0001
 batch_size = 100
 display_step = 20
@@ -200,6 +201,7 @@ def Inference(images_holder):
                                             activate=tf.nn.relu,
                                             act_name='relu'
                                       )
+            #汇总
             AddActivationSummary(fc1_out)
         #第二个全连接层
         with tf.name_scope('FC2_nonlinear'):
@@ -222,6 +224,7 @@ def Inference(images_holder):
                                       activate=tf.identity,
                                       act_name='identity'
                                       )
+            #汇总
             AddActivationSummary(logits)
             return logits
 #########################################################################################
@@ -263,7 +266,7 @@ def TrainModel():
             # optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
             # optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate)
             # optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
-            # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=0.9)
+            optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=0.9)
             # optimizer = tf.train.FtrlOptimizer(learning_rate=learning_rate)
 
             train_op = optimizer.minimize(total_loss, global_step=global_step)#计算梯度和应用梯度
@@ -290,7 +293,7 @@ def TrainModel():
         init_op = tf.global_variables_initializer()
 
         print('write graph into Tensorboard')
-        summary_writer = tf.summary.FileWriter(logdir='logs/optimizer')#日志目录
+        summary_writer = tf.summary.FileWriter(logdir='graphs/')#日志目录
         summary_writer.add_graph( graph=tf.get_default_graph()) #添加计算图
         summary_writer.flush()#
 
@@ -390,8 +393,7 @@ def TrainModel():
 
 
             #逐行将results.list列表中的内容写入evaluate_results.csv文件中
-            results_file = open("C:\Users\wuhao\PycharmProjects\Tensorflow\
-            CNN_Model2\evaluate_results\optimizers\RMSProbOptimizer/evaluate_results.csv", 'w', newline='')
+            results_file = open("RMSProp_rl_0001_evaluate_results.csv", 'w', newline='')
             csv_writer = csv.writer(results_file, dialect='excel')
             for row in results_list:
                 csv_writer.writerow(row)
@@ -399,10 +401,10 @@ def TrainModel():
 def main(argv=None):
     # maybe_download_and_extract(dataset_dir)
 
-    # train_dir = 'logs/'
-    # if tf.gfile.Exists(train_dir):
-    #     tf.gfile.DeleteRecursively(train_dir)
-    # tf.gfile.MakeDirs(train_dir)
+    train_dir = 'graphs/'
+    if tf.gfile.Exists(train_dir):
+        tf.gfile.DeleteRecursively(train_dir)
+    tf.gfile.MakeDirs(train_dir)
 
     TrainModel()
 
