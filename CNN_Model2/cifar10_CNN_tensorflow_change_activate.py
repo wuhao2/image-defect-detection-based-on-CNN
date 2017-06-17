@@ -30,7 +30,7 @@ training_epochs = 6
 """
 改变学习率
 """
-learning_rate_init = 0.01
+learning_rate_init = 0.001
 # learning_rate_init = 0.001
 # learning_rate_init = 0.0001
 batch_size = 100
@@ -394,7 +394,7 @@ def TrainModel():
 
 
             #逐行将results.list列表中的内容写入evaluate_results.csv文件中
-            results_file = open("softplus_evaluate_results.csv", 'w', newline='')
+            results_file = open("softplus1_evaluate_results.csv", 'w', newline='')
             csv_writer = csv.writer(results_file, dialect='excel')
             for row in results_list:
                 csv_writer.writerow(row)
