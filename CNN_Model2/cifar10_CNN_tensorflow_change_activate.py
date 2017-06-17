@@ -31,7 +31,7 @@ training_epochs = 6
 改变学习率
 """
 learning_rate_init = 0.001
-# learning_rate_init = 0.001
+# learning_rate_init = 0.01
 # learning_rate_init = 0.0001
 batch_size = 100
 display_step = 20
@@ -62,7 +62,7 @@ fc2_units_num = 98
 #     statinfo = os.stat(filepath)
 #     print("Successfully downloaded", filename, statinfo.st_size, 'bytes.')
 #
-#     tarfile.open(filepath, 'r:gz').extractall(dest_directory)#解压文件
+    # tarfile.open(filepath, 'r:gz').extractall(dest_directory)#解压文件
 
 def get_distorted_train_batch(data_dir, batch_size):
     """
@@ -157,8 +157,15 @@ def AddLossesSummary(losses): #传入的是[]
 ###########################################################################################
 
 def Inference(images_holder):
-        activation_func = tf.nn.softplus
-        activation_name = 'softplus'
+        # activation_func = tf.nn.softplus
+        # activation_func = tf.nn.softsign
+        # activation_func = tf.nn.sigmoid
+        # activation_func = tf.nn.relu
+        # activation_func = tf.nn.relu6
+        # activation_func = tf.nn.tanh
+        activation_func = tf.nn.elu
+
+        activation_name = 'elu'
 
         #第一个卷积层activate（conv2d + biase）
         with tf.name_scope('Conv2d_1'):
@@ -394,7 +401,7 @@ def TrainModel():
 
 
             #逐行将results.list列表中的内容写入evaluate_results.csv文件中
-            results_file = open("softplus1_evaluate_results.csv", 'w', newline='')
+            results_file = open("elu_evaluate_results.csv", 'w', newline='')
             csv_writer = csv.writer(results_file, dialect='excel')
             for row in results_list:
                 csv_writer.writerow(row)
@@ -402,10 +409,10 @@ def TrainModel():
 def main(argv=None):
     # maybe_download_and_extract(dataset_dir)
 
-    # train_dir = 'logs/'
-    # if tf.gfile.Exists(train_dir):
-    #     tf.gfile.DeleteRecursively(train_dir)
-    # tf.gfile.MakeDirs(train_dir)
+    train_dir = 'graphs/'
+    if tf.gfile.Exists(train_dir):
+        tf.gfile.DeleteRecursively(train_dir)
+    tf.gfile.MakeDirs(train_dir)
 
     TrainModel()
 
