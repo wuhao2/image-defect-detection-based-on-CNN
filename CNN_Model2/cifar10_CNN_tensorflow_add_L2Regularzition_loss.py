@@ -1,17 +1,11 @@
 #_*_ coding=utf-8 _*_
 
-import tarfile
 # from six.moves import urllib
-from urllib.request import urlretrieve,urlopen
-import urllib
 import csv
+import os
 
-import tensorflow as tf
-import os, sys
 import numpy as np
-
-# from pip._vendor.distlib._backport import tarfile
-# from sklearn.externals.six.moves import urllib
+import tensorflow as tf
 
 import cifar10_input
 
@@ -30,15 +24,17 @@ training_epochs = 6
 """
 改变学习率
 """
-learning_rate_init = 0.001
+# learning_rate_init = 0.1
 # learning_rate_init = 0.01
+learning_rate_init = 0.001
+# learning_rate_init = 0.001
 # learning_rate_init = 0.0001
 batch_size = 100
 display_step = 20
 conv1_kernels_num = 32 #64个卷积核，这是超参数，应该写到开头
 conv2_kernels_num = 32 #64个卷积核
-fc1_units_num = 192
-fc2_units_num = 98
+fc1_units_num = 250
+fc2_units_num = 150
 ################################################################################################
 #从网上下载并解压缩数据集from Alex's website，存放到data_dir指定的目录下
 # def maybe_download_and_extract(data_dir):
@@ -62,7 +58,7 @@ fc2_units_num = 98
 #     statinfo = os.stat(filepath)
 #     print("Successfully downloaded", filename, statinfo.st_size, 'bytes.')
 #
-    # tarfile.open(filepath, 'r:gz').extractall(dest_directory)#解压文件
+#     tarfile.open(filepath, 'r:gz').extractall(dest_directory)#解压文件
 
 def get_distorted_train_batch(data_dir, batch_size):
     """
@@ -157,15 +153,10 @@ def AddLossesSummary(losses): #传入的是[]
 ###########################################################################################
 
 def Inference(images_holder):
-        # activation_func = tf.nn.softplus
-        # activation_func = tf.nn.softsign
-        # activation_func = tf.nn.sigmoid
-        # activation_func = tf.nn.relu
-        # activation_func = tf.nn.relu6
-        # activation_func = tf.nn.tanh
-        activation_func = tf.nn.elu
-
-        activation_name = 'elu'
+        #######################不断的改变正则化损失在总体损失种的占比系数
+        l2loss_ratio = 0.00001
+        activation_func = tf.nn.softplus
+        activation_name = 'softplus'
 
         #第一个卷积层activate（conv2d + biase）
         with tf.name_scope('Conv2d_1'):
@@ -212,6 +203,11 @@ def Inference(images_holder):
                                             act_name=activation_name
                                       )
             AddActivationSummary(fc1_out)
+            ###################################添加权重损失
+            with tf.name_scope('L2_Loss'):
+                #先求正则化损失，然后乘以这个占比系数
+                weights_loss = tf.multiply(tf.nn.l2_loss(weights), l2loss_ratio, name='weight_loss')
+                tf.add_to_collection('losses', weights_loss)
         #第二个全连接层
         with tf.name_scope('FC2_nonlinear'):
             # fc2_units_num = 96
@@ -223,6 +219,10 @@ def Inference(images_holder):
                                       act_name=activation_name
                                       )
             AddActivationSummary(fc2_out)
+            ###################################添加权重损失
+            with tf.name_scope('L2_Loss'):
+                weights_loss = tf.multiply(tf.nn.l2_loss(weights), l2loss_ratio, name='weight_loss')
+                tf.add_to_collection('losses', weights_loss)
         #第三个全连接层
         with tf.name_scope('FC3_linear'):
             fc3_units_num = n_classes #10
@@ -256,10 +256,15 @@ def TrainModel():
             #不能使用tf.nn.softmax_cross_entropy_with_logits，因为不是one-hot编码
             corss_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
                 labels=labels_holder, logits=logits)#sparse会在内部将labels编码成one-hot类型
-            cross_entropy_mean = tf.reduce_mean(corss_entropy)#平均损失
-            total_loss = cross_entropy_mean
-            #汇总损失节点
-            average_losses = AddLossesSummary([total_loss])
+            cross_entropy_mean = tf.reduce_mean(corss_entropy, name='xentropy_loss')#平均损失
+
+            ############################添加权重损失
+            tf.add_to_collection('losses', cross_entropy_mean)
+            #汇总损失节点, 总体损失 = 交叉熵损失cross_entropy + 所有权重损失L2
+            total_loss = tf.add_n(tf.get_collection('losses', ), name='total_loss')
+            #3种损失之和，参数为有四个元素的python列表
+            average_losses = AddLossesSummary(tf.get_collection('losses') + [total_loss])
+
 
 
         #定义优化训练层Train layer
@@ -401,7 +406,7 @@ def TrainModel():
 
 
             #逐行将results.list列表中的内容写入evaluate_results.csv文件中
-            results_file = open("elu_evaluate_results.csv", 'w', newline='')
+            results_file = open("L2Loss_evaluate_results.csv", 'w', newline='')
             csv_writer = csv.writer(results_file, dialect='excel')
             for row in results_list:
                 csv_writer.writerow(row)
