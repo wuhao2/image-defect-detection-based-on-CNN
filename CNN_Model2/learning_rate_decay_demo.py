@@ -10,8 +10,10 @@ num_examples_per_epoch_for_train = 10000
 batch_size = 100
 learning_rate_init = 0.1
 learning_rate_final = 0.001
-learning_rate_decauy_rate = 0.8
+
+learning_rate_decauy_rate = 0.8#改变这个值的大小，查看learning_rate下降曲线
 # learning_rate_decauy_rate = 0.5
+
 num_batchs_per_epoch = int(num_examples_per_epoch_for_train/batch_size)
 num_epochs_per_decay = 1
 learning_rate_decay_steps = int(num_batchs_per_epoch * num_epochs_per_decay)
@@ -71,7 +73,7 @@ with tf.Graph().as_default():
                 current_learning_rate = sess.run(learning_rate)
                 _, loss_value, training_step = sess.run([training_op, myloss, global_step])
 
-                print( "Train epoch:" + str(epoch) +
+                print( "Train epoch:" + str(epoch) + '\t'
                        "Train step:" + str(training_step) +
                        ", Training Rate=" + "{:.6f}".format(current_learning_rate) +
                        ", Training Loss=" + '{:.6f}'.format(loss_value))
@@ -81,7 +83,7 @@ with tf.Graph().as_default():
 
     #将评估结果保存到文件
     print("**************训练结束****************")
-    results_file = open('lr_evaluate_results.csv', 'w', newline='')
+    results_file = open('lr=0.8_evaluate_results.csv', 'w', newline='')
     csv_writer = csv.writer(results_file, dialect='excel')
     for row in results_list:
         csv_writer.writerow(row)
