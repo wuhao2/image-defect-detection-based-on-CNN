@@ -178,7 +178,7 @@ def Inference(images_holder):
             norm1_out = tf.nn.lrn(pool1_out,
                                   depth_radius=4,
                                   bias=1.0,
-                                  alpha='0.001/9.0',
+                                  alpha=0.001/9.0,
                                   beta=0.75,
                                   name='norm1')
 
@@ -198,7 +198,7 @@ def Inference(images_holder):
             norm2_out = tf.nn.lrn(conv2_out,
                                   depth_radius=4,
                                   bias=1.0,
-                                  alpha='0.001/9.0',
+                                  alpha=0.001/9.0,
                                   beta=0.75,
                                   name='norm2')
 
@@ -251,7 +251,7 @@ def Inference(images_holder):
             weights = WeightVariable(shape=[fc2_units_num, fc3_units_num],
                                      name_str='weights', stddev=1.0/fc2_units_num)
             biases = BiasesVariable(shape=[fc3_units_num], name_str='biases', init_value=0.0)
-            logits = FullyConnection(fc_dropout, weights, biases,
+            logits = FullyConnection(fc2_out, weights, biases,
                                       activate=tf.identity,
                                       act_name='identity'
                                       )
