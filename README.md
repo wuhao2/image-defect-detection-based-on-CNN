@@ -9,4 +9,6 @@
   
   * 3:**cat and dog Model**
   
+  * 4:**AutoEncoder Model**
+  
   
