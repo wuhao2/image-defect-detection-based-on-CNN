@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 import cifar_input
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 """
@@ -20,13 +20,13 @@ learning_rate_init = 0.001
 # learning_rate_init = 0.0001
 
 #算法超参数
-training_epochs = 5
+training_epochs = 1
 batch_size = 100
 display_step = 10
-conv1_kernels_num = 64 #64个卷积核，这是超参数，应该写到开头
-conv2_kernels_num = 64 #64个卷积核
-fc1_units_num = 1024  #1024个神经单元
-fc2_units_num = 512   #512个神经单元
+conv1_kernels_num = 16 #64个卷积核，这是超参数，应该写到开头
+conv2_kernels_num = 16 #64个卷积核
+fc1_units_num = 256  #1024个神经单元
+fc2_units_num = 128   #512个神经单元
 
 #数据集中输入图像的参数
 dataset_dir_cifar10= '../cifar10_dataset/cifar-10-batches-bin/'
@@ -38,7 +38,7 @@ image_channel = cifar_input.IMAGE_DEPTH
 
 #通过修改cifar10or20or100，就可以测试cifar10， cifar100， cifar20
 #或者使用假数据跑模型(cifar10or20or100 = -1)
-cifar10or20or100 = 100
+cifar10or20or100 = 20
 if cifar10or20or100 == 10:
     n_classes = cifar_input.NUM_CLASSES_CIFAR10#cifar10中类的数量
     dataset_dir = dataset_dir_cifar10
@@ -330,7 +330,7 @@ def TrainModel():
         with tf.device('/gpu:0'):
             with tf.Session() as sess:
                 sess.run(init_op)
-                # tf.train.start_queue_runners()#启动数据读取队列，必须要加此代码
+                tf.train.start_queue_runners()#启动数据读取队列，必须要加此代码,返回所有线程的列表
 
                 print('==>>>>>>==开始在训练集上训练模型==<<<<<<<<=====')
                 total_batches = int(num_examples_per_epoch_for_train / batch_size) #500
@@ -338,8 +338,6 @@ def TrainModel():
                 print("Train sample count per epoch:", num_examples_per_epoch_for_train)#50000
                 print("total batch count per epoch:", total_batches)#500
 
-                #启动读取数据的队列
-                tf.train.start_queue_runners()#返回所有线程的列表
                 #记录模型被训练的步数
                 training_step = 0
 

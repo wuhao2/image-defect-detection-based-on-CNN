@@ -184,7 +184,7 @@ def distorted_inputs(cifar10or20or100, data_dir, batch_size):
             raise ValueError('Failed to find file: ' + f)
 
     filename_queue = tf.train.string_input_producer(filenames)#产生一个文件读取队列
-    read_input = read_cifar10(filename_queue)#读取文件名队列，返回一个result对象
+    read_input = read_cifar(filename_queue,coarse_or_fine)#读取文件名队列，返回一个result对象
     cast_image = tf.cast(read_input.uint8image, tf.float32)#位深度变成浮点数uint8image--->float32
 
     height = IMAGE_SIZE#要生成的目标文件大小32*32
@@ -260,7 +260,7 @@ def inputs(cifar10or20or100, eval_data, data_dir, batch_size):
     # Create a queue that produces the filenames to read.
     filename_queue = tf.train.string_input_producer(filenames)#传入文件名列表 到 字符串输入生成器 产生文件名队列
     # 从文件名队列中读取样本.
-    read_input = read_cifar(filename_queue) #返回的是一个类对象result
+    read_input = read_cifar(filename_queue, coarse_or_fine) #返回的是一个类对象result
     reshaped_image = tf.cast(read_input.uint8image, tf.float32)#8位图像--->32位float图像
 
     height = IMAGE_SIZE
