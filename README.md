@@ -4,9 +4,10 @@
 * [theano for deeplearning] (http://neuralnetworksanddeeplearning.com/chap6.html)
 * [activation func] (https://zh.wikipedia.org/wiki/%E5%8F%8C%E6%9B%B2%E5%87%BD%E6%95%B0)
 
+## Picture show
+![ Tensorflow-graph ](https://github.com/wuhao2/image-defect-detection-based-on-CNN/blob/master/tensors_flowing.gif）
 
-! [Tensorflow-graph] （https://github.com/wuhao2/image-defect-detection-based-on-CNN/blob/master/test/tensors_flowing.gif）
-! [VGGNet-model] (https://github.com/wuhao2/image-defect-detection-based-on-CNN/blob/master/CNN_VGGNet/images/007.png?raw=true)
+![VGGNet-model](https://github.com/wuhao2/image-defect-detection-based-on-CNN/blob/master/CNN_VGGNet/images/007.png?raw=true)
 # Tensforflow-python
 
   * 1:**Mnist dataset Model**
