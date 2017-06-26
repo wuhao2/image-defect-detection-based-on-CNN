@@ -1,5 +1,8 @@
 # Tensorflow
 [Tensorflow官网] (http://www.tensorflow.org)
+[Opencv3 for python] (http://docs.opencv.org/3.1.0/dc/da5/tutorial_py_drawing_functions.html)
+[theano for deeplearning] (http://neuralnetworksanddeeplearning.com/chap6.html)
+[activation func] (https://zh.wikipedia.org/wiki/%E5%8F%8C%E6%9B%B2%E5%87%BD%E6%95%B0)
 
 # Tensforflow-python
 
@@ -7,11 +10,12 @@
   
   * 2:**Cifar10 dataset Mode**
   
+  * 3:**cifar10 & cifar100 Model**
   
-  * 3:**cat and dog Model**
+  * 4:**cat and dog Model**
   
-  * 4:**AutoEncoder Model**
+  * 5:**AutoEncoder Model**
   
-  * 5:**CNN for AlexNet**
+  * 6:**CNN for AlexNet**
   
   
