@@ -1,10 +1,12 @@
 # Tensorflow
 * [Tensorflow官网] (http://www.tensorflow.org)
-* [Tensorflow-graph] （https://github.com/wuhao2/image-defect-detection-based-on-CNN/blob/master/test/tensors_flowing.gif）
 * [Opencv3 for python] (http://docs.opencv.org/3.1.0/dc/da5/tutorial_py_drawing_functions.html)
 * [theano for deeplearning] (http://neuralnetworksanddeeplearning.com/chap6.html)
 * [activation func] (https://zh.wikipedia.org/wiki/%E5%8F%8C%E6%9B%B2%E5%87%BD%E6%95%B0)
 
+
+! [Tensorflow-graph] （https://github.com/wuhao2/image-defect-detection-based-on-CNN/blob/master/test/tensors_flowing.gif）
+! [VGGNet-model] (https://github.com/wuhao2/image-defect-detection-based-on-CNN/blob/master/CNN_VGGNet/images/007.png?raw=true)
 # Tensforflow-python
 
   * 1:**Mnist dataset Model**
