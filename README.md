@@ -7,15 +7,11 @@
 # Tensforflow-python
 
   * 1:**Mnist dataset Model**
-  
   * 2:**Cifar10 dataset Mode**
-  
-  * 3:**cifar10 & cifar100 Model**
-  
-  * 4:**cat and dog Model**
-  
+  * 3:**cifar10 & cifar100 Model**
+  * 4:**cat and dog Model** 
   * 5:**AutoEncoder Model**
-  
-  * 6:**CNN for AlexNet**
+  * 6:**CNN for AlexNet**
+  * 7:**CNN for VGGNet** 
   
   
