@@ -237,10 +237,11 @@ def TrainModel():
                                                                 eval_data=True,
                                                                 batch_size=batch_size )
 
-
+        #保存模型结构和参数
+        saver = tf.train.Saver(tf.global_variables())
         #添加初始化节点
         init_op = tf.global_variables_initializer()
-
+        #将计算图写入tensorBoard
         print('write graph into Tensorboard')
         summary_writer = tf.summary.FileWriter(logdir='logs/tensorflow', graph=tf.get_default_graph())
         summary_writer.close()
@@ -301,11 +302,16 @@ def TrainModel():
                         #每隔display_step,记录训练集上的损失值和准确率
                         results_list.append([training_step, loss_value, training_step, batch_accuracy])
 
-                        print("Train ste:" + str(training_step) +
+                        print("training epoch:" + str(epoch) +
+                              "Train step:" + str(training_step) +
                               ", Training Loss=" + "{:.6f}".format(loss_value) +
-                              ", Training Accuracy=" +
-                              '{:.5f}'.format(batch_accuracy))
+                              ", Training Accuracy=" + '{:.5f}'.format(batch_accuracy))
+
+
+
             print("训练完毕！！！！！")
+
+
 
 
             print('==>>>>>>==开始在测试集上评估模型==<<<<<<<<=====')

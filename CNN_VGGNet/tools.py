@@ -163,7 +163,7 @@ def load(data_path, session):
 def test_load():
     data_path = './/vgg16_pretrain//vgg16.npy'
     
-    data_dict = np.load(data_path, encoding='latin1').item()
+    data_dict = np.load(data_path, encoding='latin1').item()   #load already trained parms
     keys = sorted(data_dict.keys())
     for key in keys:
         weights = data_dict[key][0]

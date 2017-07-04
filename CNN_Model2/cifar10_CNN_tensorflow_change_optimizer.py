@@ -98,13 +98,13 @@ def get_undistorted_eval_batch(data_dir, eval_data, batch_size):
     return images, labels#返回batch_size=100批次的样本
 
 
+#_*_ coding=utf-8 _*_
 
-#初始化权重
-def WeightVariable(shape, name_str, stddev=0.1):
-    #截断正态分布
-    initial = tf.truncated_normal(shape=shape, stddev=stddev, dtype=tf.float32)
-    return tf.Variable(initial, dtype=tf.float32, name=name_str)
-
+# from six.moves import urllib
+import csv
+import os
+import numpy as np
+import tensorflow as tf
 #初始化偏重
 def BiasesVariable(shape, name_str, init_value=0.0):
     #常量节点初始化偏置

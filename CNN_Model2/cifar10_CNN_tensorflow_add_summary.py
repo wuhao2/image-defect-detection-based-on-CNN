@@ -336,7 +336,7 @@ def TrainModel():
                         #每隔display_step,记录训练集上的损失值和准确率
                         results_list.append([training_step, loss_value, training_step, batch_accuracy])
 
-                        print("Train ste:" + str(training_step) +
+                        print("Train step:" + str(training_step) +
                               ", Training Loss=" + "{:.6f}".format(loss_value) +
                               ", Training Accuracy=" +
                               '{:.5f}'.format(batch_accuracy))

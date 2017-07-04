@@ -5,7 +5,7 @@ import os
 from tensorflow.examples.tutorials.mnist import input_data
 
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 learning_rate_init = 0.01
 training_epochs = 1

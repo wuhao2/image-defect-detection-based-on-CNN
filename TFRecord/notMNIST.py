@@ -4,9 +4,6 @@ import os
 import matplotlib.pyplot as plt
 import skimage.io as io
 
-
-#%%
-
 def get_file(file_dir):
     '''Get full image directory and corresponding labels
     Args:

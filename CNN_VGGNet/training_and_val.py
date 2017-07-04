@@ -41,8 +41,8 @@ IS_PRETRAIN = True
 #%%   Training
 def train():
     
-    pre_trained_weights = './/vgg16_pretrain//vgg16.npy'
-    data_dir = './/data//cifar-10-batches-bin//'
+    # pre_trained_weights = './/vgg16_pretrain//vgg16.npy'   #comment this code void load parameter
+    data_dir = '..//cifar10_dataset//cifar-10-batches-bin//' #cifar10 dataset path
     train_log_dir = './/logs//train//'
     val_log_dir = './/logs//val//'
     
@@ -73,13 +73,13 @@ def train():
     sess.run(init)
     
     # load the parameter file, assign the parameters, skip the specific layers
-    tools.load_with_skip(pre_trained_weights, sess, ['fc6','fc7','fc8'])   
+    # tools.load_with_skip(pre_trained_weights, sess, ['fc6','fc7','fc8'])    #comment this code void load parameter
 
 
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)    
     tra_summary_writer = tf.summary.FileWriter(train_log_dir, sess.graph)
-    val_summary_writer = tf.summary.FileWriter(val_log_dir, sess.graph)
+    val_summary_writer = tf.summary.FileWriter(val_log_dir, sess.graph)    #save tensorboard graph
     
     try:
         for step in np.arange(MAX_STEP):
@@ -88,7 +88,8 @@ def train():
                 
             tra_images,tra_labels = sess.run([tra_image_batch, tra_label_batch])
             _, tra_loss, tra_acc = sess.run([train_op, loss, accuracy],
-                                            feed_dict={x:tra_images, y_:tra_labels})            
+                                            feed_dict={x:tra_images, y_:tra_labels})
+
             if step % 50 == 0 or (step + 1) == MAX_STEP:                 
                 print ('Step: %d, loss: %.4f, accuracy: %.4f%%' % (step, tra_loss, tra_acc))
                 summary_str = sess.run(summary_op)
@@ -176,4 +177,4 @@ def evaluate():
 #%%
 
 
-
+train()
