@@ -1,3 +1,4 @@
+from __future__ import division, print_function, absolute_import
 # _*_ coding: utf-8 _*_
 __author__ = 'wuhao'
 __date__ = '2017/7/6 10:12'
@@ -14,7 +15,6 @@ Links:
     - [Flower Dataset (17)](http://www.robots.ox.ac.uk/~vgg/data/flowers/17/)
 """
 
-from __future__ import division, print_function, absolute_import
 
 import tflearn
 from tflearn.layers.core import input_data, dropout, fully_connected

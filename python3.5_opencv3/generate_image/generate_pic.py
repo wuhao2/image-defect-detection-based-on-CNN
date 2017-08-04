@@ -37,6 +37,6 @@ while(1):
     cv2.setMouseCallback('image',draw_circle)
     cv2.imshow('image',img)
     k = cv2.waitKey(1) & 0xFF #return ascii encode
-    if k == 27: # press esc exit
+    if k == 27:  # press esc exit
         break
 cv2.destroyAllWindows()

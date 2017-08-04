@@ -12,8 +12,8 @@ IMG_W = 208  # resize the image, if the input image is too large, training will 
 IMG_H = 208
 BATCH_SIZE = 16
 CAPACITY = 2000
-MAX_STEP = 10000 # with current parameters, it is suggested to use MAX_STEP>10k
-learning_rate = 0.0001 # with current parameters, it is suggested to use learning rate<0.0001
+MAX_STEP = 6000 # with current parameters, it is suggested to use MAX_STEP>10k
+learning_rate = 0.001 # with current parameters, it is suggested to use learning rate<0.0001
 
 
 #%%
@@ -31,43 +31,45 @@ def run_training():
                                                           IMG_H,
                                                           BATCH_SIZE,
                                                           CAPACITY)
-    train_logits = model.inference(train_batch, BATCH_SIZE, N_CLASSES)
-    train_loss = model.losses(train_logits, train_label_batch)
-    train_op = model.trainning(train_loss, learning_rate)
-    train__acc = model.evaluation(train_logits, train_label_batch)
 
-    summary_op = tf.summary.merge_all()
-    sess = tf.Session()
-    train_writer = tf.summary.FileWriter(logs_train_dir, sess.graph)
-    saver = tf.train.Saver()
+    with tf.name_scope("training"):
+        train_logits = model.inference(train_batch, BATCH_SIZE, N_CLASSES)
+        train_loss = model.losses(train_logits, train_label_batch)
+        train_op = model.trainning(train_loss, learning_rate)
+        train__acc = model.evaluation(train_logits, train_label_batch)
 
-    sess.run(tf.global_variables_initializer())
-    coord = tf.train.Coordinator()
-    threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+        summary_op = tf.summary.merge_all()
+        sess = tf.Session()
+        train_writer = tf.summary.FileWriter(logs_train_dir, sess.graph)
+        saver = tf.train.Saver()
 
-    try:
-        for step in np.arange(MAX_STEP):
-            if coord.should_stop():
-                break
-            _, tra_loss, tra_acc = sess.run([train_op, train_loss, train__acc])
+        sess.run(tf.global_variables_initializer())
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-            if step % 50 == 0:
-                print('Step %d, train loss = %.2f, train accuracy = %.2f%%' %(step, tra_loss, tra_acc*100.0))
-                summary_str = sess.run(summary_op)
-                train_writer.add_summary(summary_str, step)
+        try:
+            for step in np.arange(MAX_STEP):
+                if coord.should_stop():
+                    break
+                _, tra_loss, tra_acc = sess.run([train_op, train_loss, train__acc])
 
-            if step % 2000 == 0 or (step + 1) == MAX_STEP:
-                checkpoint_path = os.path.join(logs_train_dir, 'model.ckpt')
-                saver.save(sess, checkpoint_path, global_step=step)  #保存模型到logs_train_dir文件夹
+                if step % 20 == 0:
+                    print('Step %d, train loss = %.2f, train accuracy = %.2f%%' %(step, tra_loss, tra_acc*100.0))
+                    summary_str = sess.run(summary_op)
+                    train_writer.add_summary(summary_str, step)
 
-    except tf.errors.OutOfRangeError:
-        print('Done training -- epoch limit reached')
-    finally:
-        coord.request_stop()
+                if step % 2000 == 0 or (step + 1) == MAX_STEP:
+                    checkpoint_path = os.path.join(logs_train_dir, 'model.ckpt')
+                    saver.save(sess, checkpoint_path, global_step=step)  #保存模型和模型参数到logs_train_dir文件夹
 
-    coord.join(threads)
-    sess.close()
+        except tf.errors.OutOfRangeError:
+            print('Done training -- epoch limit reached')
+
+        finally:
+            coord.request_stop()
+        coord.join(threads)
+        sess.close()
 
 # 单元测试#开始训练
-# run_training()
+run_training()
 

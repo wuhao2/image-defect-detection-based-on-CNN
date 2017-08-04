@@ -19,7 +19,7 @@ def inference(images, batch_size, n_classes):
         biases = tf.get_variable('biases',
                                  shape=[16],
                                  dtype=tf.float32,
-                                 initializer=tf.constant_initializer(0.1))
+                                 initializer=tf.constant_initializer(0.1))  #初始值如何选择不好，可能导致模型不收敛
         conv = tf.nn.conv2d(images, weights, strides=[1,1,1,1], padding='SAME')
         pre_activation = tf.nn.bias_add(conv, biases)
         conv1 = tf.nn.relu(pre_activation, name= scope.name)
@@ -54,7 +54,7 @@ def inference(images, batch_size, n_classes):
                                padding='SAME',name='pooling2')
 
 
-    #local3
+    #Fully_connection layer
     with tf.variable_scope('local3') as scope:
         reshape = tf.reshape(pool2, shape=[batch_size, -1])
         dim = reshape.get_shape()[1].value
@@ -79,7 +79,6 @@ def inference(images, batch_size, n_classes):
                                  dtype=tf.float32,
                                  initializer=tf.constant_initializer(0.1))
         local4 = tf.nn.relu(tf.matmul(local3, weights) + biases, name='local4')
-
 
     # softmax
     with tf.variable_scope('softmax_linear') as scope:
@@ -142,7 +141,7 @@ def evaluation(logits, labels):
         correct = tf.nn.in_top_k(logits, labels, 1)
         correct = tf.cast(correct, tf.float16)
         accuracy = tf.reduce_mean(correct)
-        tf.summary.scalar(scope.name+'/accuracy', accuracy)
+        tf.summary.scalar(scope.name+'/accuracy', accuracy)  #tensorboard summary
     return accuracy
 
 #%%

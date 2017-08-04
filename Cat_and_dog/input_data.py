@@ -7,6 +7,7 @@
 import tensorflow as tf
 import numpy as np
 import os
+import imghdr
 
 # train_dir = '/Users/wuhao/Pictures/data/train/'
 train_dir = './data/train/train/'
@@ -18,69 +19,76 @@ def get_files(file_dir):
     Returns:
         list of images and labels
     '''
-    cats = []
-    label_cats = []
-    dogs = []
-    label_dogs = []
-    for file in os.listdir(file_dir):#return simple file
-        name = file.split(sep='.')   #return ['cat', '0', 'jpg']
-        if name[0]=='cat':
-            cats.append(file_dir + file)
-            label_cats.append(0)
-        else:
-            dogs.append(file_dir + file)
-            label_dogs.append(1)
-    print('There are %d cats \n There are %d dogs' %(len(cats), len(dogs)))
 
-    image_list = np.hstack((cats, dogs)) #水平 拼接成一个列表
-    label_list = np.hstack((label_cats, label_dogs))
+    with tf.name_scope("image_label_list"):
 
-    temp = np.array([image_list, label_list])
-    temp = temp.transpose()
-    np.random.shuffle(temp)#随机洗牌
+        cats = []
+        label_cats = []
+        dogs = []
+        label_dogs = []
+        for file in os.listdir(file_dir):#return simple file
+            name = file.split(sep='.')   #return ['cat', '0', 'jpg']
+            if name[0]=='cat':
+                cats.append(file_dir + file)
+                label_cats.append(0)
+            else:
+                dogs.append(file_dir + file)
+                label_dogs.append(1)
+        print('There are %d cats \n There are %d dogs' %(len(cats), len(dogs)))
 
-    image_list = list(temp[:, 0])
-    label_list = list(temp[:, 1])
-    label_list = [int(i) for i in label_list]
-    return image_list, label_list
+
+
+        image_list = np.hstack((cats, dogs)) #水平 拼接成一个列表
+        label_list = np.hstack((label_cats, label_dogs))
+
+        temp = np.array([image_list, label_list])
+        temp = temp.transpose()
+        np.random.shuffle(temp)#随机洗牌
+
+        image_list = list(temp[:, 0])
+        label_list = list(temp[:, 1])
+        label_list = [int(i) for i in label_list]
+        return image_list, label_list
 
 
 
 def get_batch(image, label, image_W, image_H, batch_size, capacity):  #image and  label is a  list
 
-    image = tf.cast(image, tf.string)#将python list格式，转换成tensorflow格式
-    label = tf.cast(label, tf.int32)
-    # generate an input queue
-    input_queue = tf.train.slice_input_producer([image, label])#生成队列string_input_producer
-    label = input_queue[1]
-    image_contents = tf.read_file(input_queue[0])
-    image = tf.image.decode_jpeg(image_contents, channels=3)#解码jpg,png图片
-    # image = tf.image.decode_image(image_contents, channels=3)#解码jpg,png,gif图片
+    with tf.name_scope("batch_image_lable"):
 
-    ######################################################
-    # data argumentation should go to here  数据特征工程 #
-    ######################################################
+        image = tf.cast(image, tf.string)#将python list格式，转换成tensorflow格式
+        label = tf.cast(label, tf.int32)
+        # generate an input queue
+        input_queue = tf.train.slice_input_producer([image, label])#image和label是分开的，所以用slice_input_producer
+        label = input_queue[1]
+        image_contents = tf.read_file(input_queue[0])
+        image = tf.image.decode_jpeg(image_contents, channels=3)#解码jpg,png图片
+        # image = tf.image.decode_image(image_contents, channels=3)#解码jpg,png,gif图片
 
-    image = tf.image.resize_image_with_crop_or_pad(image, image_W, image_H)  #对图片进行（扩充和裁剪）
-    # if you want to test the generated batches of images, you might want to comment the following line.
-    image = tf.image.per_image_standardization(image)  #数据标准化，，0-255的value进行减去均值 除以方差
-    # image_batch, label_batch = tf.train.batch([image, label],
-    #                                           batch_size= batch_size,
-    #                                           num_threads= 64,
-    #                                           capacity = capacity) #生成批次batch
+        ######################################################
+        # data argumentation should go to here  数据特征工程 #
+        ######################################################
 
-    #you can also use shuffle_batch
-    CAPACITY = 256
-    image_batch, label_batch = tf.train.shuffle_batch([image,label],
-                                                         batch_size=batch_size,
-                                                         num_threads=64,
-                                                         capacity=CAPACITY,
-                                                         min_after_dequeue=CAPACITY-1)
+        image = tf.image.resize_image_with_crop_or_pad(image, image_W, image_H)  #对图片进行（扩充和裁剪）
+        # if you want to test the generated batches of images, you might want to comment the following line.
+        image = tf.image.per_image_standardization(image)  #数据标准化，，0-255的value进行减去均值 除以方差
+        image_batch, label_batch = tf.train.batch([image, label],
+                                                  batch_size= batch_size,
+                                                  num_threads= 64,
+                                                  capacity = capacity) #生成批次batch
 
-    label_batch = tf.reshape(label_batch, [batch_size])  #重新reshape一下 image_batch, label_batch
-    image_batch = tf.cast(image_batch, tf.float32)
+        #you can also use shuffle_batch
+        # CAPACITY = 256
+        # image_batch, label_batch = tf.train.shuffle_batch([image,label],
+        #                                                      batch_size=batch_size,
+        #                                                      num_threads=64,
+        #                                                      capacity=CAPACITY,
+        #                                                      min_after_dequeue=CAPACITY-1)
 
-    return image_batch, label_batch
+        label_batch = tf.reshape(label_batch, [batch_size])  #重新reshape一下 image_batch, label_batch
+        image_batch = tf.cast(image_batch, tf.float32)
+
+        return image_batch, label_batch
 
 #########################################################################################%% TEST 测试一下
 # To test the generated batches of images

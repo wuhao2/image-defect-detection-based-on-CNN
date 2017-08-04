@@ -1,3 +1,4 @@
+from __future__ import division, print_function, absolute_import
 # _*_ coding: utf-8 _*_
 __author__ = 'wuhao'
 __date__ = '2017/7/6 10:13'
@@ -13,12 +14,13 @@ Links:
     - [CIFAR-10 Dataset](https://www.cs.toronto.edu/~kriz/cifar.html)
 """
 
-from __future__ import division, print_function, absolute_import
 
 import tflearn
 
 # Residual blocks
-# 32 layers: n=5, 56 layers: n=9, 110 layers: n=18
+# 32 layers: n=5,
+# 56 layers: n=9,
+# 110 layers: n=18
 n = 5
 
 # Data loading
