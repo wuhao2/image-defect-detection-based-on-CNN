@@ -94,21 +94,19 @@ def convert_to_tfrecord(images, labels, save_dir, name):
     if np.shape(images)[0] != n_samples:
         raise ValueError('Images size %d does not match label size %d.' %(images.shape[0], n_samples))
 
-
-
-    # wait some time here, transforming need some time based on the size of your data.
+    #  wait some time here, transforming need some time based on the size of your data.
     writer = tf.python_io.TFRecordWriter(filename)
     print('\nTransform start......')
     for i in np.arange(0, n_samples):
         try:
-            image = io.imread(images[i]) # type(image) must be array!
+            image = io.imread(images[i])  # type(image) must be array!
             image_raw = image.tostring()
             label = int(labels[i])
             example = tf.train.Example(features=tf.train.Features(feature={
-                'label':int64_feature(label),
+                'label': int64_feature(label),
                 'image_raw': bytes_feature(image_raw)}))
             writer.write(example.SerializeToString())
-        except IOError as e:#如果图片有损坏，打印出错误信息，继续读取下一张
+        except IOError as e:  # 如果图片有损坏，打印出错误信息，继续读取下一张
             print('Could not read:', images[i])
             print('error: %s' %e)
             print('Skip it!\n')
@@ -145,21 +143,18 @@ def read_and_decode(tfrecords_file, batch_size):
     ##########################################################
     # all the images of notMNIST are 28*28, you need to change the image size if you use other dataset.
 
-    image = tf.reshape(image, [28, 28])  #如果用的是自己的数据，注意这个地方需要修改哦
+    image = tf.reshape(image, [28, 28])  # 如果用的是自己的数据，注意这个地方需要修改哦
     label = tf.cast(img_features['label'], tf.int32)
     image_batch, label_batch = tf.train.batch([image, label],
-                                              batch_size= batch_size,
-                                              num_threads= 64,
-                                              capacity = 2000)
+                                              batch_size=batch_size,
+                                              num_threads=64,
+                                              capacity=2000)
     return image_batch, tf.reshape(label_batch, [batch_size])
 
-
-
-
-#%% Convert data to TFRecord
-
-test_dir = 'C://Users//Windows7//Documents//Python Scripts//notMNIST//notMNIST_small//'
-save_dir = 'C://Users//Windows7//Documents//Python Scripts//notMNIST//'
+# %% Convert data to TFRecord
+test_dir = 'C://Users//wuhao//PycharmProjects//Tensorflow-Python11//TFRecord//Data//notMNIST_small//notMNIST_small'
+# save_dir = 'C://Users//wuhao//PycharmProjects//Tensorflow-Python11//TFRecord//'
+save_dir = 'C://Users\wuhao\PycharmProjects\Tensorflow-Python11\TFRecord'    # 注意： windows 中\相当于//
 BATCH_SIZE = 25
 
 
@@ -183,17 +178,17 @@ def plot_images(images, labels):
     plt.show()
 
 
-tfrecords_file = 'C://Users//Windows7//Documents//Python Scripts//notMNIST//test.tfrecords'
+tfrecords_file = 'C://Users//wuhao//PycharmProjects//Tensorflow-Python11//TFRecord//test.tfrecords'
 image_batch, label_batch = read_and_decode(tfrecords_file, batch_size=BATCH_SIZE)
 
-with tf.Session()  as sess:
+with tf.Session() as sess:
 
     i = 0
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
 
     try:
-        while not coord.should_stop() and i<1:
+        while not coord.should_stop() and i < 1:
             # just plot one batch size
             image, label = sess.run([image_batch, label_batch])
             plot_images(image, label)
