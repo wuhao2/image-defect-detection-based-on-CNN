@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 def create_blank(width, height, rgb_color=(0, 0, 0)):
     """Create new image(numpy array) filled with certain color in RGB"""
     # Create black blank image

@@ -31,9 +31,9 @@ def main(_):
                 Y_pred = tf.nn.softmax(logits=logits)
 
         #Loss: 定义损失节点
-        with tf.name_scope('TrainLoss'):
+        with tf.name_scope('Loss'):
             TrainLoss = tf.reduce_mean(
-                -tf.reduce_sum(Y_true*tf.log(tf.nn.softmax(Y_pred)), axis=1))#交叉熵损失
+                -tf.reduce_sum(Y_true*tf.log(tf.nn.softmax(Y_pred)), axis=1))  # 交叉熵损失
 
         #Train：定义训练节点
         with tf.name_scope('Train'):

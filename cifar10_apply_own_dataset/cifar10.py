@@ -1,35 +1,3 @@
-#By @Kevin Xu
-#kevin28520@gmail.com
-#Youtube: https://www.youtube.com/channel/UCVCSn4qQXTDAtGWpWAe4Plw
-#Chinese weibo: http://bit.ly/2nAmOcO
-
-    
-#The aim of this project is to use TensorFlow to process our own data.
-#    - cifar10_input.py:  read in data and generate batches
-#    - cifar10.py: build the model architecture, train, evaluate
-
-
-# I used Ubuntu with Python 3.5, TensorFlow 1.0*, other OS should also be good.
-# I didn't use data argumentation, I spent less than 30 mins with 10K steps.
-
-
-# data: cifar10 binary version
-# https://www.cs.toronto.edu/~kriz/cifar.html
-# data size: ~184M
-
-# How to run?
-# 0. you need to change the data directory
-# 1. run cifar10.py
-# 2. call train() in the console to train the model
-# 3. call evaluate() in the console to test on the test data
-
-# Note: 
-# it is suggested to restart your kenel to train the model multiple times 
-# (in order to clear all the variables in the memory)
-# Otherwise errors may occur: conv1/weights/biases already exist......
-
-
-#%%
 
 import os
 import os.path
@@ -243,9 +211,9 @@ def train():
 #%% To test the model on the test data
 def evaluate():
     with tf.Graph().as_default():
-        
-        log_dir = '/home/kevin/tensorflow/cifar10_apply_own_dataset/logs10000/'
-        test_dir = '/home/kevin/tensorflow/cifar10_apply_own_dataset/data/cifar-10-batches-bin/'
+
+        log_dir = './logs/'
+        test_dir = './data/cifar-10-batches-bin/'
         n_test = 10000
         
         
@@ -260,7 +228,7 @@ def evaluate():
         saver = tf.train.Saver(tf.global_variables())
         
         with tf.Session() as sess:
-            
+            #恢复模型
             print("Reading checkpoints...")
             ckpt = tf.train.get_checkpoint_state(log_dir)
             if ckpt and ckpt.model_checkpoint_path:
@@ -294,11 +262,6 @@ def evaluate():
     
 #%%
 
+train()
 
 
-
-
-
-
-
-        

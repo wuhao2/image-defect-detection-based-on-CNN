@@ -18,7 +18,9 @@ def weight_variable(shape):
   """Create a weight variable with appropriate initialization."""
   initial = tf.truncated_normal(shape, stddev=0.1)
   return tf.Variable(initial)
-#创建一个带有合适初始值的偏置bias变量
+
+
+# 创建一个带有合适初始值的偏置bias变量
 def bias_variable(shape):
   """Create a bias variable with appropriate initialization."""
   initial = tf.constant(0.1, shape=shape)
@@ -29,8 +31,12 @@ hidden2_units = 25
 hidden3_units = 15
 hidden4_units = 10
 
-#实例化一个占位符
-images = tf.placeholder(tf.float32, [None, IMAGE_PIXELS], name='x_input')
+
+
+#input layer
+with tf.name_scope('input'):
+  #实例化一个占位符
+  images = tf.placeholder(tf.float32, [None, IMAGE_PIXELS], name='x_input')
 
 
 #可重用代码创建一个简单的神经网络
@@ -50,17 +56,19 @@ def nn_layer(input_tensor, input_dim, output_dim, layer_name, act=tf.nn.relu):
       with tf.name_scope('biases'):
         biases = bias_variable([output_dim])
         # variable_summaries(biases)
-      with tf.name_scope('Wx_plus_b'):
+      with tf.name_scope('sigmoid'):
         preactivate = tf.matmul(input_tensor, weights) + biases
         # tf.summary.histogram('pre_activations', preactivate)
       activations = act(preactivate, name='activation')
       # tf.summary.histogram('activations', activations)
       return activations
 
-hidden1 = nn_layer(images, IMAGE_PIXELS, hidden1_units, 'layer1')
-hidden2 = nn_layer(hidden1, hidden1_units, hidden2_units, 'layer2')
-hidden3 = nn_layer(hidden2, hidden2_units, hidden3_units, 'layer3')
-hidden4 = nn_layer(hidden3, hidden3_units, hidden4_units, 'layer4')
+hiddenl = nn_layer(images, IMAGE_PIXELS, hidden1_units, 'hidden-layer')
+hidden2 = nn_layer(hiddenl, hidden1_units, hidden2_units, 'output-layer')
+# hidden3 = nn_layer(hidden2, hidden2_units, hidden3_units, 'layer3')
+# hidden4 = nn_layer(hidden3, hidden3_units, hidden4_units, 'layer4')
+
+
 
 writer = tf.summary.FileWriter("logs/nn_layer", tf.get_default_graph())
 writer.flush()

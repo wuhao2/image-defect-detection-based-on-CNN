@@ -9,7 +9,7 @@ import numpy as np
 import cv2
 # import cv2.cv as cv
 
-cap=cv2.VideoCapture("./output.avi")
+cap=cv2.VideoCapture("output.avi")
 
 feasize=1
 max=200
