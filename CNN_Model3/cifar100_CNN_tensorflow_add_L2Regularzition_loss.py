@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 import cifar_input
 
-# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 """
@@ -243,9 +243,12 @@ def Inference(images_holder):
 
 def TrainModel():
     """
-    构造计算图
+    构造计算图, 用于gpu运算
     """
-    with tf.Graph().as_default():
+    g = tf.Graph()
+    with g.device('/gpu:0'):
+    # with tf.Graph().device('/gpu:0'):
+    # with tf.Graph().as_default():
         # 计算图输入
         with tf.name_scope('input'):
             # 与mnist不同的是，cifar10数据都进来的就是一个三维的图像数据24*24*24
@@ -332,12 +335,15 @@ def TrainModel():
         results_list.append(['training_step', 'train_loss', 'train_step', 'train_accuracy'])
 
         """
-        启动会话，运行计算图
+        启动会话，运行计算图,allow_soft_placement=True，有些节点不能放在GPU上运算，会自动转到CPU
         """
+        config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=True)
         with tf.device('/gpu:0'):
-            with tf.Session() as sess:
+            with tf.Session(config=config) as sess:
                 sess.run(init_op)
-                tf.train.start_queue_runners()  # 启动数据读取队列，必须要加此代码,返回所有线程的列表
+                coord = tf.train.Coordinator()
+                threads = tf.train.start_queue_runners(sess=sess, coord=coord) # 启动数据读取队列，必须要加此代码,返回所有线程的列表
+                # tf.train.start_queue_runners()  # 启动数据读取队列，必须要加此代码,返回所有线程的列表
 
                 print('==>>>>>>==开始在训练集上训练模型==<<<<<<<<=====')
                 total_batches = int(num_examples_per_epoch_for_train / batch_size)  # 500
@@ -385,6 +391,8 @@ def TrainModel():
 
                 summary_writer.close()
                 print("训练完毕！！！！！")
+                coord.request_stop()
+                coord.join(threads)
     ###################################################################################################################
 
         # 评估模型，只需要跑一个epoch
@@ -417,6 +425,9 @@ def TrainModel():
                 csv_writer = csv.writer(results_file, dialect='excel')
                 for row in results_list:
                     csv_writer.writerow(row)
+
+                coord.request_stop()
+                coord.join(threads)
 ############################################################################################
 def main(argv=None):
     # maybe_download_and_extract(dataset_dir)

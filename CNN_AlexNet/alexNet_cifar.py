@@ -203,7 +203,7 @@ def Inference(images_holder):
 
     # 第4个卷积层ativate（conv2d + biase）
     with tf.name_scope('Conv2d_4'):
-        weights = WeightVariable(shape=[3,3,conv3_kernels_num, conv4_kernels_num],
+        weights = WeightVariable(shape=[3, 3, conv3_kernels_num, conv4_kernels_num],
                                  name_str='weights', stddev=5e-1)  # 0.005
         biases = BiasesVariable(shape=[conv4_kernels_num], name_str='biases', init_value=0.0)
         conv4_out = Conv2d(conv3_out, weights, biases, stride=1, padding='SAME')  # 没有传激活函数，默认为rel

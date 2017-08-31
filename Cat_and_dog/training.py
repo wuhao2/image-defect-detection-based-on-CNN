@@ -39,6 +39,7 @@ def run_training():
         train__acc = model.evaluation(train_logits, train_label_batch)
 
         summary_op = tf.summary.merge_all()
+
         sess = tf.Session()
         train_writer = tf.summary.FileWriter(logs_train_dir, sess.graph)
         saver = tf.train.Saver()
